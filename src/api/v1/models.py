@@ -16,6 +16,5 @@ class UrlResponse(BaseModel):
 
 
 class InfoModel(BaseModel):
-    id: UUID
     url_id: UUID
     counter: int

@@ -1,4 +1,11 @@
+import logging
+
 from pydantic import BaseSettings, PostgresDsn
+
+from core.logger import LOGGING
+
+
+logging.basicConfig(**LOGGING)
 
 
 class AppSettings(BaseSettings):
