@@ -7,6 +7,18 @@ from .models import UrlResponse, UrlIn, InfoModel
 router = APIRouter()
 
 
+@router.get(
+    '/ping',
+    description='Returns information about the availability status of the database',
+    summary='Status of the database',
+    status_code=status.HTTP_200_OK
+)
+async def ping(url_service: UrlService = Depends(get_url_service)) -> Response:
+    if await url_service.ping_db():
+        return Response(status_code=status.HTTP_200_OK)
+    return Response(status_code=status.HTTP_400_BAD_REQUEST)
+
+
 @router.post(
     '/',
     response_model=UrlResponse,
@@ -35,7 +47,9 @@ async def get_origin_url(
     url_service: UrlService = Depends(get_url_service)
 ) -> Response:
     url = await url_service.get_by_id(shorten_url_id)
-    return Response(headers={'Location': url.original_url}, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    if not url.is_deleted:
+        return Response(headers={'Location': url.original_url}, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    return Response(status_code=status.HTTP_410_GONE)
 
 
 @router.get(
@@ -50,6 +64,23 @@ async def get_origin_url(
 async def get_url_status(
     shorten_url_id: str,
     url_service: UrlService = Depends(get_url_service)
-):
+) -> InfoModel:
     info = await url_service.get_info(shorten_url_id)
     return InfoModel.parse_obj(info.__dict__)
+
+
+@router.delete(
+    '/{shorten_url_id}',
+    response_model=UrlResponse,
+    description="""'Delete' the saved URL. The entry remains, but
+    is marked as deleted. When trying to get the full URL, return
+    a response with the code 410 Gone""",
+    summary='Delete the saved URL.',
+    status_code=status.HTTP_200_OK
+)
+async def delete_url(
+    shorten_url_id: str,
+    url_service: UrlService = Depends(get_url_service)
+) -> UrlResponse:
+    url = await url_service.delete(shorten_url_id)
+    return UrlResponse.parse_obj(url.__dict__)

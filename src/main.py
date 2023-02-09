@@ -1,5 +1,6 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
@@ -13,6 +14,15 @@ app = FastAPI(
     docs_url='/api/v1/openapi',
     openapi_url='/api/v1/openapi.json'
 )
+
+
+@app.middleware('http')
+async def validate_ip(request: Request, call_next):
+    ip = str(request.client.host)
+    if ip in app_settings.blacklist:
+        data = {'message': f'IP {ip} is not allowed to access this resource.'}
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=data)
+    return await call_next(request)
 
 
 @app.on_event('startup')

@@ -28,3 +28,6 @@ class HistoryModel(Base):
     url_id = Column(ForeignKey('url.id'))
     counter = Column(Integer, default=0)
     url = relationship('UrlModel', back_populates='history')
+
+    def __repr__(self):
+        return "Info(url_id='%s', counter='%d')" % (self.url_id, self.counter)

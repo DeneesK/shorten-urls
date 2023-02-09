@@ -5,10 +5,10 @@ import subprocess
 
 from sqlalchemy import create_engine
 
-from core.config import logging
+from core import config
 
 
-logger = logging.getLogger(__name__)
+logger = config.logging.getLogger(__name__)
 
 
 def save_statement(statement: bool) -> None:
@@ -26,6 +26,9 @@ def migrate() -> bool:
     try:
         answer = subprocess.run(["alembic", "revision", "--autogenerate", "-m" "01_initial-db"])
         logger.info("The exit code was: %d" % answer.returncode)
+    except Exception as ex:
+        logger.error(ex)
+    try:
         answer = subprocess.run(["alembic", "upgrade", "head"])
         logger.info("The exit code was: %d" % answer.returncode)
     except Exception as ex:

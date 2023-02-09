@@ -23,7 +23,6 @@ class UrlService(DBObjectService):
             select(HistoryModel).where(HistoryModel.url_id == id_)
         )
         history = resp.scalar()
-        print(history)
         history.counter += 1
         self.session.add(history)
         await self.session.commit()
@@ -35,6 +34,20 @@ class UrlService(DBObjectService):
         )
         result = history.scalars().all()
         return result[0]
+
+    async def delete(self, id_: str):
+        url = await self.session.get(UrlModel, id_)
+        url.is_deleted = True
+        self.session.add(url)
+        await self.session.commit()
+        return url
+
+    async def ping_db(self):
+        try:
+            _ = await self.session.execute('SELECT * FROM url LIMIT 1')
+        except Exception:
+            return False
+        return True
 
 
 def get_url_service(
