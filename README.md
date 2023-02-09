@@ -1,5 +1,6 @@
 ### To launch:
-`docker-compose up`
+- `cp env.sample .env`
+- `docker-compose up`
 #### then:
 `http://127.0.0.1:8000/api/v1/openapi#/`
 
