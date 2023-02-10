@@ -11,8 +11,8 @@ from api.v1 import urls
 app = FastAPI(
     title=app_settings.app_title,
     description=app_settings.app_description,
-    docs_url='/api/v1/openapi',
-    openapi_url='/api/v1/openapi.json'
+    docs_url='/api/openapi',
+    openapi_url='/api/openapi.json'
 )
 
 
@@ -36,7 +36,8 @@ async def on_shutdown():
     db.async_session.close_all()
 
 
-app.include_router(urls.router, prefix="/api/v1")
+app.include_router(urls.router, prefix="/api/v1", tags=['urls_service'])
+
 
 if __name__ == '__main__':
     uvicorn.run(

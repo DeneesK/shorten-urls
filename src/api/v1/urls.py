@@ -2,21 +2,13 @@ from fastapi import APIRouter, Depends, Response
 from fastapi import status
 
 from services.urls import UrlService, get_url_service
-from .models import UrlResponse, UrlIn, InfoModel
+from .schemas import UrlResponse, UrlIn, InfoModel
+from .db import api_router
+
 
 router = APIRouter()
 
-
-@router.get(
-    '/ping',
-    description='Returns information about the availability status of the database',
-    summary='Status of the database',
-    status_code=status.HTTP_200_OK
-)
-async def ping(url_service: UrlService = Depends(get_url_service)) -> Response:
-    if await url_service.ping_db():
-        return Response(status_code=status.HTTP_200_OK)
-    return Response(status_code=status.HTTP_400_BAD_REQUEST)
+router.include_router(api_router, prefix='/db', tags=['db'])
 
 
 @router.post(
@@ -46,7 +38,7 @@ async def get_origin_url(
     shorten_url_id: str,
     url_service: UrlService = Depends(get_url_service)
 ) -> Response:
-    url = await url_service.get_by_id(shorten_url_id)
+    url = await url_service.redirect(shorten_url_id)
     if not url.is_deleted:
         return Response(headers={'Location': url.original_url}, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
     return Response(status_code=status.HTTP_410_GONE)

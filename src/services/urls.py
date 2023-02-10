@@ -1,6 +1,6 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from .common import DBObjectService
 from models.db_models import UrlModel, HistoryModel
@@ -10,23 +10,18 @@ from db.db import get_session
 class UrlService(DBObjectService):
     async def create_shorten_url(self, url: str) -> UrlModel:
         new_url = UrlModel(original_url=url)
-        self.session.add(new_url)
-        await self.session.commit()
         new_history = HistoryModel(url_id=new_url.id)
-        self.session.add(new_history)
+        self.session.add_all((new_url, new_history))
         await self.session.commit()
         return new_url
 
-    async def get_by_id(self, id_: str) -> UrlModel:
-        url = await self.session.get(UrlModel, id_)
+    async def redirect(self, id_: str) -> UrlModel:
         resp = await self.session.execute(
-            select(HistoryModel).where(HistoryModel.url_id == id_)
+            select(UrlModel, HistoryModel).join(HistoryModel, UrlModel.id == id_)
         )
-        history = resp.scalar()
-        history.counter += 1
-        self.session.add(history)
+        print(resp.all())
         await self.session.commit()
-        return url
+        return 1
 
     async def get_info(self, id_: str):
         history = await self.session.execute(
@@ -41,13 +36,6 @@ class UrlService(DBObjectService):
         self.session.add(url)
         await self.session.commit()
         return url
-
-    async def ping_db(self):
-        try:
-            _ = await self.session.execute('SELECT * FROM url LIMIT 1')
-        except Exception:
-            return False
-        return True
 
 
 def get_url_service(
