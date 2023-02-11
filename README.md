@@ -5,7 +5,7 @@
 `http://127.0.0.1:8000/api/openapi`
 
 #### tests:
-`docker-compose -f docker-compose-tests.yaml up`
+`docker-compose -f docker-compose-dev.yaml up`
 
 # Проектное задание четвёртого спринта
 

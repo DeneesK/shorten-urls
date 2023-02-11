@@ -1,10 +1,11 @@
 version: '3'
 services:
-
-  db:
+  # create database special for tests
+  test_db:
     image: postgres:14.5-alpine
+    container_name: db
     volumes:
-      - db:/var/lib/postgresql/data
+      - test_db:/var/lib/postgresql/data
     ports:
       - "${DOCKER_DB_PORT}:5432"
     env_file:
@@ -18,11 +19,22 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      - test_db
     entrypoint: >
-      sh -c "sleep 10
+      sh -c "sleep 5
       && alembic upgrade head
-      && uvicorn main:app --host 0.0.0.0 --port 8000"
+      && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+
+  tests:
+    build:
+      context: ./src
+    env_file:
+      - .env
+    depends_on:
+      - url_service
+    entrypoint: >
+      sh -c "sleep 7
+      && pytest"
 
 volumes:
-  db:
+  test_db:

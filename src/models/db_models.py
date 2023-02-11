@@ -11,7 +11,7 @@ from db.db import Base
 class UrlModel(Base):
     __tablename__ = "url"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    original_url = Column(Text, nullable=False)
+    original_url = Column(Text, nullable=False, unique=False)
     created_at = Column(DateTime, index=True, default=datetime.utcnow)
     is_deleted = Column(Boolean, default=False)
     history = relationship("HistoryModel")

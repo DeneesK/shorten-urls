@@ -14,7 +14,7 @@ class UrlService(DBObjectService):
         await self.session.commit()
         return new_url
 
-    async def redirect(self, id_: str) -> str | None:
+    async def update_counter(self, id_: str) -> str | None:
         resp = await self.session.execute(
             update(HistoryModel).where(HistoryModel.url_id == id_)
             .values({'counter': select(HistoryModel.counter).where(HistoryModel.url_id == id_).scalar_subquery() + 1})
@@ -33,7 +33,8 @@ class UrlService(DBObjectService):
 
     async def delete(self, id_: str) -> tuple:
         url = await self.session.execute(
-            update(UrlModel).returning(UrlModel).where(UrlModel.id == id_).values({'is_deleted': True}))
+            update(UrlModel).returning(UrlModel).where(UrlModel.id == id_).values({'is_deleted': True})
+        )
         await self.session.commit()
         return url.all()[0]
 

@@ -35,7 +35,7 @@ async def get_origin_url(
     shorten_url_id: str,
     url_service: UrlService = Depends(get_url_service)
 ) -> Response:
-    original_url = await url_service.redirect(shorten_url_id)
+    original_url = await url_service.update_counter(shorten_url_id)
     if original_url:
         return Response(headers={'Location': original_url}, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
     return Response(status_code=status.HTTP_410_GONE)
