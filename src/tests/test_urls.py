@@ -1,12 +1,9 @@
 from http import HTTPStatus
 
-import pytest
-
 from main import app
 from config import tests_settings, URL_EXAMPLE
 
 
-@pytest.mark.asyncio
 async def test_create_shorten_url(aiohttp_session):
     data = {'url': URL_EXAMPLE}
     path = tests_settings.base_path + app.url_path_for('shorten_url')
@@ -16,7 +13,6 @@ async def test_create_shorten_url(aiohttp_session):
     assert HTTPStatus.CREATED == resp.status
 
 
-@pytest.mark.asyncio
 async def test_redirect(aiohttp_session, create_url):
     url_obj = await create_url(url=URL_EXAMPLE)
     path = tests_settings.base_path + app.url_path_for('get_origin_url', shorten_url_id=url_obj['id'])
@@ -26,7 +22,6 @@ async def test_redirect(aiohttp_session, create_url):
         assert HTTPStatus.TEMPORARY_REDIRECT == resp.status
 
 
-@pytest.mark.asyncio
 async def test_url_status(aiohttp_session, create_url):
     url_obj = await create_url(url=URL_EXAMPLE)
 
@@ -42,7 +37,6 @@ async def test_url_status(aiohttp_session, create_url):
     assert status_data['url_id'] == url_obj['id']
 
 
-@pytest.mark.asyncio
 async def test_url_delete(aiohttp_session, create_url):
     url_obj = await create_url(url=URL_EXAMPLE)
     path = tests_settings.base_path + app.url_path_for('delete_url', shorten_url_id=url_obj['id'])
