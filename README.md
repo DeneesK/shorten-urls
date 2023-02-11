@@ -2,7 +2,10 @@
 - `cp env.sample .env`
 - `docker-compose up`
 #### then:
-`http://127.0.0.1:8000/api/v1/openapi#/`
+`http://127.0.0.1:8000/api/openapi`
+
+#### tests:
+`docker-compose -f docker-compose-tests.yaml up`
 
 # Проектное задание четвёртого спринта
 
