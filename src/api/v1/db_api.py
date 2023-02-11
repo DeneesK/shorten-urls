@@ -4,10 +4,10 @@ from fastapi import status
 from services.db import DBService, get_db_service
 
 
-api_router = APIRouter()
+router = APIRouter()
 
 
-@api_router.get(
+@router.get(
     '/ping',
     description='Returns information about the availability status of the database',
     summary='Status of the database',

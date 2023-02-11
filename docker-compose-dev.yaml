@@ -6,24 +6,24 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "${DOCKER_DB_PORT}:5432"
     env_file:
       - .env
   
-  # url_service:
-  #   build:
-  #     context: ./src
-  #   ports:
-  #     - "${DOCKER_API_PORT}:8000"
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - db
-  #   command: pwd
-  #   entrypoint: >
-  #     sh -c "sleep 10
-  #     && alembic upgrade head
-  #     && uvicorn main:app --host 0.0.0.0 --port 8000"
+  url_service:
+    build:
+      context: ./src
+    ports:
+      - "${DOCKER_API_PORT}:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: pwd
+    entrypoint: >
+      sh -c "sleep 10
+      && alembic upgrade head
+      && uvicorn main:app --host 0.0.0.0 --port 8000"
 
 volumes:
   db:

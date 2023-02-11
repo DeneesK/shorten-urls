@@ -3,12 +3,9 @@ from fastapi import status
 
 from services.urls import UrlService, get_url_service
 from .schemas import UrlResponse, UrlIn, InfoModel
-from .db import api_router
 
 
-router = APIRouter()
-
-router.include_router(api_router, prefix='/db', tags=['db'])
+router = APIRouter(tags=['urls service'])
 
 
 @router.post(
@@ -38,9 +35,9 @@ async def get_origin_url(
     shorten_url_id: str,
     url_service: UrlService = Depends(get_url_service)
 ) -> Response:
-    url = await url_service.redirect(shorten_url_id)
-    if not url.is_deleted:
-        return Response(headers={'Location': url.original_url}, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    original_url = await url_service.redirect(shorten_url_id)
+    if original_url:
+        return Response(headers={'Location': original_url}, status_code=status.HTTP_307_TEMPORARY_REDIRECT)
     return Response(status_code=status.HTTP_410_GONE)
 
 
@@ -75,4 +72,4 @@ async def delete_url(
     url_service: UrlService = Depends(get_url_service)
 ) -> UrlResponse:
     url = await url_service.delete(shorten_url_id)
-    return UrlResponse.parse_obj(url.__dict__)
+    return UrlResponse.parse_obj(url)

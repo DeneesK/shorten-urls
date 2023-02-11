@@ -6,7 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from db import db
 from core.config import app_settings
-from api.v1 import urls
+from api.v1 import base as v1
+
 
 app = FastAPI(
     title=app_settings.app_title,
@@ -36,7 +37,7 @@ async def on_shutdown():
     db.async_session.close_all()
 
 
-app.include_router(urls.router, prefix="/api/v1", tags=['urls_service'])
+app.include_router(v1.main_router, prefix='/v1/api')
 
 
 if __name__ == '__main__':

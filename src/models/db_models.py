@@ -25,9 +25,9 @@ class UrlModel(Base):
 class HistoryModel(Base):
     __tablename__ = 'history'
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    url_id = Column(ForeignKey('url.id'))
+    url_id = Column(ForeignKey('url.id'), nullable=False)
     counter = Column(Integer, default=0)
     url = relationship('UrlModel', back_populates='history')
 
     def __repr__(self):
-        return "Info(url_id='%s', counter='%d')" % (self.url_id, self.counter)
+        return "History(url_id='%s', counter='%d')" % (self.url_id, self.counter)

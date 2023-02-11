@@ -9,33 +9,33 @@ from db.db import get_session
 
 class UrlService(DBObjectService):
     async def create_shorten_url(self, url: str) -> UrlModel:
-        new_url = UrlModel(original_url=url)
-        new_history = HistoryModel(url_id=new_url.id)
-        self.session.add_all((new_url, new_history))
+        new_url = UrlModel(original_url=url, history=[HistoryModel(),])
+        self.session.add(new_url)
         await self.session.commit()
         return new_url
 
-    async def redirect(self, id_: str) -> UrlModel:
+    async def redirect(self, id_: str) -> str | None:
         resp = await self.session.execute(
-            select(UrlModel, HistoryModel).join(HistoryModel, UrlModel.id == id_)
+            update(HistoryModel).where(HistoryModel.url_id == id_)
+            .values({'counter': select(HistoryModel.counter).where(HistoryModel.url_id == id_).scalar_subquery() + 1})
+            .returning(select(UrlModel.original_url)
+                       .filter(UrlModel.id == id_, UrlModel.is_deleted == False).scalar_subquery())  # noqa: E712
         )
-        print(resp.all())
         await self.session.commit()
-        return 1
+        return resp.all()[0][0]
 
-    async def get_info(self, id_: str):
+    async def get_info(self, id_: str) -> HistoryModel:
         history = await self.session.execute(
             select(HistoryModel).where(HistoryModel.url_id == id_)
         )
         result = history.scalars().all()
         return result[0]
 
-    async def delete(self, id_: str):
-        url = await self.session.get(UrlModel, id_)
-        url.is_deleted = True
-        self.session.add(url)
+    async def delete(self, id_: str) -> tuple:
+        url = await self.session.execute(
+            update(UrlModel).returning(UrlModel).where(UrlModel.id == id_).values({'is_deleted': True}))
         await self.session.commit()
-        return url
+        return url.all()[0]
 
 
 def get_url_service(
