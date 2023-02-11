@@ -37,7 +37,7 @@ async def on_shutdown():
     db.async_session.close_all()
 
 
-app.include_router(v1.main_router, prefix='/v1/api')
+app.include_router(v1.main_router, prefix='/api/v1')
 
 
 if __name__ == '__main__':

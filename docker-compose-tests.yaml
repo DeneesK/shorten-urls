@@ -20,9 +20,20 @@ services:
     depends_on:
       - db
     entrypoint: >
-      sh -c "sleep 10
+      sh -c "sleep 5
       && alembic upgrade head
       && uvicorn main:app --host 0.0.0.0 --port 8000"
+    
+  tests:
+    build:
+      context: ./tests
+    env_file:
+      - .env
+    depends_on:
+      - url_service
+    entrypoint: >
+      sh -c "sleep 7
+      && pytest"
 
 volumes:
   db:
